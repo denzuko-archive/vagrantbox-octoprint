@@ -1,0 +1,50 @@
+---
+- name: Provision VagrantBox
+  hosts: all
+  become: true
+  remote_user: vagrant
+
+  tasks:
+    - name: "(chore) Update repositories"
+      tags: ["provisioning", "apk", "setup"]
+      lineinfile:
+        dest: /etc/apk/repositories
+        line: "http://{{item.node}}.alpinelinux.org/alpine/{{item.name}}"
+      with_items:
+        - { name: "main", node: "dl-2" }
+        - { name: "community", node: "dl-2" }
+        - { name: "main", node: "dl-3" }
+        - { name: "community", node: "dl-3" }
+
+    - name: "(chore) Add packages"
+      tags: ["provisioning", "apk", "install"]
+      apk: update_cache=true state=latest name={{item.name}}
+      with_items:
+        - { name: 'py-pip' }
+        - { name: 'bzr' }
+        - { name: 'nginx' }
+        - { name: 'docker' }
+
+    - name: "(chore) Set sysctl values"
+      tags: ["provisioning", "apk", "tuning"]
+      sysctl:
+        name: "kernel.grsecurity.chroot_deny_{{item}}"
+        sysctl_set: yes
+        reload: yes
+        state: present 
+        value: 1
+      with_items:
+        - "chmod"
+        - "mkmod"
+
+    - name: "(chore) Initialize services"
+      tags: ["provisioning", "apk", "services"]
+      service:
+        name: "{{item}}"
+        state: started
+        enabled: yes
+      with_items:
+        - "docker"
+        - "nginx"
+
+# vim:ft=ansible:sts=4:ts=4:et:cin:ai:sw=4:

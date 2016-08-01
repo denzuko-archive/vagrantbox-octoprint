@@ -1,0 +1,30 @@
+defaults: &defaults
+  box: "maier/alpine-3.4-x86_64"
+  ram: 512
+  gui: false
+  cpus: 1
+  provider: "virtualbox"
+  vtx: "on"
+  maxcpu: 50
+  apic: "on"
+  guestext: false
+  vboxsf: false
+  provisioning: |
+    apk update && apk add ansible
+    [ -x /etc/ansible ] && (
+      sudo install --mode=644 /tmp/inventory.ini /etc/ansible/hosts
+      sudo ansible-playbook -i /tmp/inventory.ini /tmp/provisioning.yml)
+
+develop: 
+  <<: *defaults
+  vtx: "on"
+
+testing: 
+  <<: *defaults
+  vtx: "on"
+
+staging:
+  <<: *defaults
+
+production:
+  <<: *defaults
