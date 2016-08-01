@@ -10,10 +10,11 @@ defaults: &defaults
   guestext: false
   vboxsf: false
   provisioning: |
+    #!/bin/bash
     apk update && apk add ansible
-    [ -x /etc/ansible ] && (
-      sudo install --mode=644 /tmp/inventory.ini /etc/ansible/hosts
-      sudo ansible-playbook -i /tmp/inventory.ini /tmp/provisioning.yml)
+    wget -O/tmp/inventory.ini http://raw.githubcontent.com/denzuko/
+    wget -O/tmp/provisioning.yml http://raw.githubcontent.com/denzuko/
+    sudo ansible-playbook -i /tmp/inventory.ini /tmp/provisioning.yml)
 
 develop: 
   <<: *defaults
